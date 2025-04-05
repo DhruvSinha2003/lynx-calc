@@ -18,6 +18,7 @@ type NumericValue =
 type ButtonProps = {
   value: ButtonValue;
   onClick: (value: ButtonValue) => void;
+  wide?: boolean;
 };
 
 export function App(): JSX.Element {
@@ -36,8 +37,7 @@ export function App(): JSX.Element {
       // Remove the last character from the input.
       setInput((prev) => prev.slice(0, -1));
     } else {
-      // If a computation was just done and the user presses a number or dot,
-      // clear the input first.
+      // If a computation was just done and a number or dot is pressed, clear the input first.
       if (shouldReset && /[0-9.]/.test(value)) {
         setInput(value);
         setResult("");
@@ -63,26 +63,6 @@ export function App(): JSX.Element {
     setResult("");
   };
 
-  // Rearranged button order so that "=" appears last.
-  const numberButtons: Array<NumericValue | CalculatorOperation> = [
-    "7",
-    "8",
-    "9",
-    "/",
-    "4",
-    "5",
-    "6",
-    "*",
-    "1",
-    "2",
-    "3",
-    "-",
-    "0",
-    ".",
-    "+",
-    "=",
-  ];
-
   return (
     <view className="calculator">
       <view className="display">
@@ -90,22 +70,48 @@ export function App(): JSX.Element {
         <text className="result">{result}</text>
       </view>
       <view className="buttons">
-        {numberButtons.map((value) => (
-          <Button key={value} value={value} onClick={handleButtonClick} />
-        ))}
-        <Button value="C" onClick={handleButtonClick} />
-        <Button value="←" onClick={handleButtonClick} />
+        <view className="row">
+          <Button value="7" onClick={handleButtonClick} />
+          <Button value="8" onClick={handleButtonClick} />
+          <Button value="9" onClick={handleButtonClick} />
+          <Button value="/" onClick={handleButtonClick} />
+        </view>
+        <view className="row">
+          <Button value="4" onClick={handleButtonClick} />
+          <Button value="5" onClick={handleButtonClick} />
+          <Button value="6" onClick={handleButtonClick} />
+          <Button value="*" onClick={handleButtonClick} />
+        </view>
+        <view className="row">
+          <Button value="1" onClick={handleButtonClick} />
+          <Button value="2" onClick={handleButtonClick} />
+          <Button value="3" onClick={handleButtonClick} />
+          <Button value="-" onClick={handleButtonClick} />
+        </view>
+        <view className="row">
+          <Button value="0" onClick={handleButtonClick} />
+          <Button value="." onClick={handleButtonClick} />
+          <Button value="←" onClick={handleButtonClick} />
+
+          <Button value="+" onClick={handleButtonClick} />
+        </view>
+        <view className="row">
+          <Button value="C" onClick={handleButtonClick} />
+          <Button value="=" onClick={handleButtonClick} wide />
+        </view>
       </view>
     </view>
   );
 }
 
-const Button: React.FC<ButtonProps> = ({ value, onClick }): JSX.Element => {
-  // Add the 'wide' class for the "0" and "=" buttons.
-  const isWide = value === "0" || value === "=";
+const Button: React.FC<ButtonProps> = ({
+  value,
+  onClick,
+  wide,
+}): JSX.Element => {
   return (
     <text
-      className={`button ${isWide ? "wide" : ""}`}
+      className={`button ${wide ? "wide" : ""}`}
       bindtap={() => onClick(value)}
     >
       {value}
