@@ -2,7 +2,7 @@ import { useState } from "@lynx-js/react";
 import "./App.css";
 
 type ButtonValue = string;
-type CalculatorOperation = "+" | "-" | "*" | "/" | "=" | "C";
+type CalculatorOperation = "+" | "-" | "*" | "/" | "=" | "C" | "←";
 type NumericValue =
   | "0"
   | "1"
@@ -23,14 +23,29 @@ type ButtonProps = {
 export function App(): JSX.Element {
   const [result, setResult] = useState<string>("");
   const [input, setInput] = useState<string>("");
+  const [shouldReset, setShouldReset] = useState<boolean>(false);
 
   const handleButtonClick = (value: ButtonValue): void => {
     if (value === "=") {
       calculateResult();
+      setShouldReset(true);
     } else if (value === "C") {
       clearInput();
+      setShouldReset(false);
+    } else if (value === "←") {
+      // Remove the last character from the input.
+      setInput((prev) => prev.slice(0, -1));
     } else {
-      setInput((prev: string) => prev + value);
+      // If a computation was just done and the user presses a number or dot,
+      // clear the input first.
+      if (shouldReset && /[0-9.]/.test(value)) {
+        setInput(value);
+        setResult("");
+        setShouldReset(false);
+      } else {
+        setInput((prev) => prev + value);
+        setShouldReset(false);
+      }
     }
   };
 
@@ -48,6 +63,7 @@ export function App(): JSX.Element {
     setResult("");
   };
 
+  // Rearranged button order so that "=" appears last.
   const numberButtons: Array<NumericValue | CalculatorOperation> = [
     "7",
     "8",
@@ -63,8 +79,8 @@ export function App(): JSX.Element {
     "-",
     "0",
     ".",
-    "=",
     "+",
+    "=",
   ];
 
   return (
@@ -78,13 +94,21 @@ export function App(): JSX.Element {
           <Button key={value} value={value} onClick={handleButtonClick} />
         ))}
         <Button value="C" onClick={handleButtonClick} />
+        <Button value="←" onClick={handleButtonClick} />
       </view>
     </view>
   );
 }
 
-const Button: React.FC<ButtonProps> = ({ value, onClick }): JSX.Element => (
-  <text className="button" bindtap={() => onClick(value)}>
-    {value}
-  </text>
-);
+const Button: React.FC<ButtonProps> = ({ value, onClick }): JSX.Element => {
+  // Add the 'wide' class for the "0" and "=" buttons.
+  const isWide = value === "0" || value === "=";
+  return (
+    <text
+      className={`button ${isWide ? "wide" : ""}`}
+      bindtap={() => onClick(value)}
+    >
+      {value}
+    </text>
+  );
+};
