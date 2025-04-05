@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useState } from "@lynx-js/react";
-
+import { useState } from "@lynx-js/react";
 import "./App.css";
 
 type ButtonValue = string;
@@ -18,7 +17,7 @@ type NumericValue =
   | ".";
 type ButtonProps = {
   value: ButtonValue;
-  bindtap: (value: ButtonValue) => void;
+  onClick: (value: ButtonValue) => void;
 };
 
 export function App(): JSX.Element {
@@ -26,12 +25,17 @@ export function App(): JSX.Element {
   const [input, setInput] = useState<string>("");
 
   const handleButtonClick = (value: ButtonValue): void => {
-    setInput((prev: string) => prev + value);
+    if (value === "=") {
+      calculateResult();
+    } else if (value === "C") {
+      clearInput();
+    } else {
+      setInput((prev: string) => prev + value);
+    }
   };
 
   const calculateResult = (): void => {
     try {
-      // Using Function constructor instead of eval for slightly safer evaluation
       const evalResult = new Function("return " + input)();
       setResult(String(evalResult));
     } catch (error) {
@@ -64,29 +68,23 @@ export function App(): JSX.Element {
   ];
 
   return (
-    <view>
-      <view className="calculator">
-        <view className="display">
-          <view className="input">{input}</view>
-          <view className="result">{result}</view>
-        </view>
-        <view className="buttons">
-          {numberButtons.map((value) => (
-            <Button
-              key={value}
-              value={value}
-              bindtap={value === "=" ? calculateResult : handleButtonClick}
-            />
-          ))}
-          <Button value="C" bindtap={clearInput} />
-        </view>
+    <view className="calculator">
+      <view className="display">
+        <text className="input">{input}</text>
+        <text className="result">{result}</text>
+      </view>
+      <view className="buttons">
+        {numberButtons.map((value) => (
+          <Button key={value} value={value} onClick={handleButtonClick} />
+        ))}
+        <Button value="C" onClick={handleButtonClick} />
       </view>
     </view>
   );
 }
 
-const Button: React.FC<ButtonProps> = ({ value, bindtap }): JSX.Element => (
-  <text className="button" bindtap={() => bindtap(value)}>
+const Button: React.FC<ButtonProps> = ({ value, onClick }): JSX.Element => (
+  <text className="button" bindtap={() => onClick(value)}>
     {value}
   </text>
 );
